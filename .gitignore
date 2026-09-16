@@ -1,4 +1,4 @@
-# Ambiente
+# AME - Gitignore
 .env
 .venv/
 venv/
@@ -9,6 +9,9 @@ __pycache__/
 *.log
 *.sqlite
 *.db
+ame.db
+ame_memory.json
+data/
 
 # OS
 .DS_Store
@@ -18,21 +21,23 @@ Thumbs.db
 node_modules/
 dist/
 build/
+.ame/
 
 # n8n
 .n8n/
 
 # Dados sensíveis e temporários
+exports/
 dados/
 downloads/
 cookies/
 screenshots/
-exports/
 *.mp4
 *.mp3
 *.jpg
 *.png
 !dashboard/assets/*.png
+!dashboard/*.html
 
 # Chaves
 credentials.json
@@ -43,3 +48,15 @@ session.json
 .vscode/
 .idea/
 *.swp
+
+# Tests & Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Alembic
+alembic_version/
+
+# Logs
+logs/

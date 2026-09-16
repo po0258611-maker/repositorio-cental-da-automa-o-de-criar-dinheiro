@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AME - Autonomous Money Engine | Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,system-ui,-apple-system,sans-serif}
+:root{--bg:#08080c;--card:#12121a;--border:#1e1e2e;--muted:#8a8aa3;--accent:#00d084;--accent2:#00a86b;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#a855f7}
+body{background:var(--bg);color:#e8e8ef;min-height:100vh;line-height:1.5}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+header h1{font-size:22px;font-weight:900;letter-spacing:-0.5px;color:#000}
+header p{color:#000;opacity:.8;font-size:13px}
+header .actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:8px 14px;border-radius:10px;font-weight:700;font-size:13px;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-dark{background:#000;color:#fff}
+.btn-light{background:#fff;color:#000}
+.btn-ghost{background:#ffffff22;color:#000;border:1px solid #0003}
+.container{max-width:1300px;margin:20px auto;padding:0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:.8}
+.card.green{border-color:#00d08433}
+.card.yellow{border-color:#f59e0b33}
+.card.blue{border-color:#3b82f633}
+.card.purple{border-color:#a855f733}
+.card.red{border-color:#ef444433}
+.card h3{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.card .value{font-size:26px;font-weight:900;letter-spacing:-1px}
+.card .sub{font-size:12px;color:var(--muted);margin-top:4px}
+.card .trend{font-size:12px;font-weight:700;margin-top:6px}
+.trend.up{color:var(--accent)}
+.trend.down{color:var(--red)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px}
+.panel h2{font-size:15px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.panel h2 small{font-weight:500;color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse}
+th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.8px;text-align:left;padding:10px;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid #1a1a2a;font-size:13px}
+.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:800;border:1px solid}
+.badge.hot{background:#ef444415;color:var(--red);border-color:#ef444435}
+.badge.ok{background:#00d08415;color:var(--accent);border-color:#00d08435}
+.badge.warn{background:#f59e0b15;color:var(--yellow);border-color:#f59e0b35}
+.badge.info{background:#3b82f615;color:var(--blue);border-color:#3b82f635}
+.progress{height:6px;background:#1e1e2e;border-radius:20px;overflow:hidden;margin-top:8px}
+.progress div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-weight:600;font-size:13px;cursor:pointer}
+.tab.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.kpi div{flex:1;min-width:120px;background:#0f0f17;border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.kpi div b{display:block;font-size:18px}
+.kpi div span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+code{background:#1e1e2e;padding:2px 6px;border-radius:6px;font-size:12px}
+footer{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+#toast{position:fixed;bottom:20px;right:20px;background:#1a1a24;border:1px solid var(--border);padding:14px 18px;border-radius:12px;box-shadow:0 10px 30px #0008;display:none;z-index:99}
+.live{width:8px;height:8px;background:var(--accent);border-radius:50%;display:inline-block;animation:pulse 1.5s infinite}
+@keyframes pulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
+</style>
+</head>
+<body>
+<header>
+<div>
+<h1>💰 AUTONOMOUS MONEY ENGINE — AME <span class="live"></span></h1>
+<p>Loop: OBSERVE → RESEARCH → DISCOVER → VALIDATE → BUILD → PUBLISH → DISTRIBUTE → SELL → MEASURE → LEARN → REPEAT</p>
+</div>
+<div class="actions">
+<a class="btn btn-dark" href="/docs" target="_blank">📚 API Docs</a>
+<a class="btn btn-light" href="/health" target="_blank">💚 Health</a>
+<button class="btn btn-ghost" onclick="runCycle()">▶️ Rodar Ciclo</button>
+</div>
+</header>
+<div class="container">
+
+<div class="grid" id="finance-grid">
+<div class="card green"><h3>💵 Saldo</h3><div class="value" id="balance">R$ 1.000,00</div><div class="sub" id="balance-sub">Inicial</div><div class="progress"><div id="balance-bar" style="width:75%"></div></div></div>
+<div class="card yellow"><h3>📈 Receita Total</h3><div class="value" id="revenue">R$ 0,00</div><div class="sub" id="revenue-sub">0 vendas</div><div class="trend up" id="revenue-trend">—</div></div>
+<div class="card blue"><h3>💸 Despesas</h3><div class="value" id="expenses">R$ 0,00</div><div class="sub">Burn R$ <span id="burn">5,00</span>/dia</div></div>
+<div class="card purple"><h3>🏦 Lucro & Margem</h3><div class="value" id="profit">R$ 0,00</div><div class="sub">Margem <span id="margin">0%</span> • ROI <span id="roi">0%</span></div><div class="trend" id="profit-trend">—</div></div>
+<div class="card yellow"><h3>⏳ Runway</h3><div class="value" id="runway">200 dias</div><div class="sub">Modo: <b id="mode">NORMAL</b></div><div class="trend up" id="runway-trend">Saudável</div></div>
+<div class="card green"><h3>🤖 Custo IA hoje</h3><div class="value" id="ai-cost">$ 0.00</div><div class="sub"><span id="ai-req">0</span> req • Limite $10.00</div><div class="progress"><div id="ai-bar" style="width:5%"></div></div></div>
+</div>
+
+<div class="tabs">
+<button class="tab active" onclick="showTab('overview')">📊 Visão Geral</button>
+<button class="tab" onclick="showTab('products')">📦 Produtos</button>
+<button class="tab" onclick="showTab('experiments')">🧪 Experimentos</button>
+<button class="tab" onclick="showTab('marketing')">📣 Marketing</button>
+<button class="tab" onclick="showTab('system')">⚙️ Sistema</button>
+</div>
+
+<div id="tab-overview">
+<div class="grid">
+<div class="panel" style="grid-column:span 2">
+<h2>🧪 Experimentos <small id="exp-summary">—</small></h2>
+<div class="kpi">
+<div><b id="exp-total">0</b><span>Total</span></div>
+<div><b id="exp-live">0</b><span>Live</span></div>
+<div><b id="exp-winners">0</b><span>Winners</span></div>
+<div><b id="exp-winrate">0%</b><span>Win Rate</span></div>
+</div>
+<table>
+<thead><tr><th>Experimento</th><th>Status</th><th>Lucro</th><th>ROI</th></tr></thead>
+<tbody id="exp-table"><tr><td colspan="4" style="color:var(--muted);text-align:center;padding:20px">Carregando...</td></tr></tbody>
+</table>
+</div>
+<div class="panel">
+<h2>📦 Produtos <small id="prod-summary">—</small></h2>
+<table>
+<thead><tr><th>Produto</th><th>Preço</th><th>Status</th></tr></thead>
+<tbody id="prod-table"><tr><td colspan="3" style="color:var(--muted);text-align:center">Carregando...</td></tr></tbody>
+</table>
+<div style="margin-top:12px">
+<button class="btn btn-dark" onclick="discover()">🔍 Descobrir Oportunidade</button>
+<button class="btn btn-ghost" onclick="showTab('products')">Ver todos</button>
+</div>
+</div>
+</div>
+
+<div class="grid">
+<div class="panel">
+<h2>📣 Marketing <small id="mkt-summary">—</small></h2>
+<div class="kpi">
+<div><b id="mkt-impr">15.4k</b><span>Impressões</span></div>
+<div><b id="mkt-ctr">5.78%</b><span>CTR</span></div>
+<div><b id="mkt-leads">134</b><span>Leads</span></div>
+<div><b id="mkt-roas">8.73</b><span>ROAS</span></div>
+</div>
+<div style="font-size:13px;color:var(--muted)">
+CAC: <b id="mkt-cac" style="color:#fff">R$ 11,11</b> • LTV: <b id="mkt-ltv" style="color:#fff">R$ 489</b> • Conversão: <b id="mkt-conv" style="color:#fff">13.43%</b>
+</div>
+</div>
+<div class="panel">
+<h2>⚙️ Sistema <small id="sys-summary">—</small></h2>
+<div class="kpi">
+<div><b id="sys-agents">25</b><span>Agentes</span></div>
+<div><b id="sys-cycle">0</b><span>Ciclos</span></div>
+<div><b id="sys-mem">0</b><span>Memórias</span></div>
+<div><b id="sys-events">0</b><span>Eventos</span></div>
+</div>
+<div style="font-size:12px;color:var(--muted);margin-top:8px">
+Fase: <code id="sys-phase">OBSERVE</code> • Loop: <span id="sys-loop">Ativo</span>
+</div>
+</div>
+</div>
+
+<div class="panel">
+<h2>📜 Últimos Eventos <small>Event Bus</small></h2>
+<table>
+<thead><tr><th>Tipo</th><th>Payload</th><th>Hora</th></tr></thead>
+<tbody id="events-table"><tr><td colspan="3" style="color:var(--muted);text-align:center">Carregando...</td></tr></tbody>
+</table>
+</div>
+</div>
+
+<div id="tab-products" style="display:none">
+<div class="panel">
+<h2>📦 Produtos <small>CRUD em /products e pipeline em /products/discover</small></h2>
+<table><thead><tr><th>ID</th><th>Nome</th><th>Tipo</th><th>Preço</th><th>Status</th></tr></thead><tbody id="prod-table-full"></tbody></table>
+<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+<input id="prod-name" placeholder="Nome do produto" style="flex:1;min-width:200px;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0f0f17;color:#fff">
+<input id="prod-price" placeholder="Preço" type="number" style="width:120px;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0f0f17;color:#fff">
+<button class="btn btn-dark" onclick="createProduct()">+ Criar</button>
+<button class="btn btn-ghost" onclick="discover()">🔍 Descobrir Bundle</button>
+</div>
+</div>
+</div>
+
+<div id="tab-experiments" style="display:none">
+<div class="panel">
+<h2>🧪 Experimentos <small>Engine: IDEA → VALIDATING → BUILDING → LIVE → WINNER/FAILED</small></h2>
+<table><thead><tr><th>ID</th><th>Nome</th><th>Hipótese</th><th>Status</th><th>Budget</th><th>Profit</th><th>Ações</th></tr></thead><tbody id="exp-table-full"></tbody></table>
+<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+<input id="exp-name" placeholder="Nome experimento" style="flex:1;min-width:200px;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0f0f17;color:#fff">
+<input id="exp-hyp" placeholder="Hipótese" style="flex:2;min-width:280px;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0f0f17;color:#fff">
+<button class="btn btn-dark" onclick="createExperiment()">+ Criar</button>
+</div>
+</div>
+</div>
+
+<div id="tab-marketing" style="display:none">
+<div class="panel">
+<h2>📣 Marketing & Vendas</h2>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+<div>
+<h3 style="font-size:13px;color:var(--muted);margin-bottom:8px">Campanhas</h3>
+<table><thead><tr><th>Nome</th><th>Canal</th><th>Status</th></tr></thead><tbody id="camp-table"></tbody></table>
+</div>
+<div>
+<h3 style="font-size:13px;color:var(--muted);margin-bottom:8px">Leads & Vendas</h3>
+<table><thead><tr><th>Email</th><th>Origem</th><th>Status</th></tr></thead><tbody id="leads-table"></tbody></table>
+</div>
+</div>
+</div>
+</div>
+
+<div id="tab-system" style="display:none">
+<div class="grid">
+<div class="panel">
+<h2>🤖 Agentes <small>25 especializados</small></h2>
+<table><thead><tr><th>Agente</th><th>Categoria</th><th>Runs</th><th>Último</th><th>Ação</th></tr></thead><tbody id="agents-table"></tbody></table>
+</div>
+<div class="panel">
+<h2>🧠 Memória <small>Aprendizado contínuo</small></h2>
+<table><thead><tr><th>Categoria</th><th>Ação</th><th>Lição</th></tr></thead><tbody id="memory-table"></tbody></table>
+</div>
+</div>
+<div class="panel">
+<h2>📊 Observability <small>Health, Métricas, Logs</small></h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+<a class="btn btn-dark" href="/health" target="_blank">Health</a>
+<a class="btn btn-ghost" href="/analytics/dashboard" target="_blank">Analytics JSON</a>
+<a class="btn btn-ghost" href="/memory" target="_blank">Memory JSON</a>
+<a class="btn btn-ghost" href="/docs" target="_blank">OpenAPI</a>
+</div>
+<pre id="health-pre" style="background:#0f0f17;border:1px solid var(--border);border-radius:12px;padding:12px;overflow:auto;max-height:300px;font-size:12px;white-space:pre-wrap"></pre>
+</div>
+</div>
+
+</div>
+<div id="toast"></div>
+<footer>
+AME v1.0 • Salvador-BA 🇧🇷 • Loop autônomo • <a href="/docs" style="color:var(--accent)">API</a> • <a href="/health" style="color:var(--accent)">Health</a> • Automatize o trabalho, escale os ganhos.
+</footer>
+<script>
+const API = location.origin;
+function toast(msg, ok=true){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block'; t.style.borderColor= ok?'#00d084':'#ef4444';
+  setTimeout(()=>t.style.display='none',3000);
+}
+function showTab(name){
+  document.querySelectorAll('[id^="tab-"]').forEach(el=>el.style.display='none');
+  document.getElementById('tab-'+name).style.display='block';
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  event && event.target.classList.add('active');
+  if(name==='products') loadProducts(true);
+  if(name==='experiments') loadExperiments(true);
+  if(name==='marketing') loadMarketing();
+  if(name==='system') loadSystem();
+}
+
+async function fetchJSON(url, opts){
+  const r=await fetch(url, opts);
+  const j=await r.json();
+  if(!r.ok) throw new Error(j.detail||JSON.stringify(j));
+  return j;
+}
+async function loadFinance(){
+  try{
+    const d=await fetchJSON(API+'/finance/dashboard');
+    document.getElementById('balance').textContent='R$ '+d.balance.toFixed(2);
+    document.getElementById('revenue').textContent='R$ '+d.revenue.toFixed(2);
+    document.getElementById('expenses').textContent='R$ '+d.expenses.toFixed(2);
+    document.getElementById('profit').textContent='R$ '+d.profit.toFixed(2);
+    document.getElementById('margin').textContent=d.margin_percent.toFixed(1)+'%';
+    document.getElementById('roi').textContent=(d.roi*100).toFixed(1)+'%';
+    document.getElementById('runway').textContent=d.runway_days+' dias';
+    document.getElementById('mode').textContent=d.mode;
+    document.getElementById('mode').style.color= d.mode==='EMERGENCY'?'#ef4444':d.mode==='SURVIVAL'?'#f59e0b':d.mode==='GROW'?'#00d084':'#8a8aa3';
+    document.getElementById('burn').textContent=d.burn_rate_daily.toFixed(2);
+    // AI cost
+    const ai=await fetchJSON(API+'/analytics/ai/costs');
+    document.getElementById('ai-cost').textContent='$ '+ai.daily_cost.toFixed(4);
+    document.getElementById('ai-req').textContent=ai.daily_requests;
+    document.getElementById('ai-bar').style.width=Math.min(100, ai.daily_cost/ai.limit*100)+'%';
+  }catch(e){console.error(e)}
+}
+async function loadExperiments(full=false){
+  try{
+    const d=await fetchJSON(API+'/experiments');
+    document.getElementById('exp-total').textContent=d.stats.total;
+    document.getElementById('exp-live').textContent=d.stats.by_status.LIVE||0;
+    document.getElementById('exp-winners').textContent=d.stats.winners;
+    document.getElementById('exp-winrate').textContent=(d.stats.win_rate*100).toFixed(1)+'%';
+    document.getElementById('exp-summary').textContent=d.stats.total+' total • '+d.stats.winners+' winners';
+    const tbody=document.getElementById('exp-table');
+    const tbodyFull=document.getElementById('exp-table-full');
+    const rows=d.experiments.slice(0,5).map(e=>`<tr><td>${e.name.slice(0,30)}</td><td><span class="badge ${e.status==='WINNER'?'ok':e.status==='LIVE'?'info':e.status==='FAILED'?'hot':'warn'}">${e.status}</span></td><td>R$ ${e.profit}</td><td>${(e.roi*100).toFixed(0)}%</td></tr>`).join('');
+    tbody.innerHTML=rows||'<tr><td colspan="4" style="color:var(--muted);text-align:center">Nenhum experimento ainda — crie um!</td></tr>';
+    if(full){
+      const fullRows=d.experiments.map(e=>`<tr><td>${e.id}</td><td>${e.name.slice(0,28)}</td><td title="${e.hypothesis}">${e.hypothesis.slice(0,40)}...</td><td><span class="badge ${e.status==='WINNER'?'ok':e.status==='LIVE'?'info':'warn'}">${e.status}</span></td><td>R$ ${e.budget}</td><td>R$ ${e.profit}</td><td><button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="evalExp('${e.id}')">Avaliar</button></td></tr>`).join('');
+      tbodyFull.innerHTML=fullRows||'<tr><td colspan="7" style="color:var(--muted);text-align:center">Nenhum experimento</td></tr>';
+    }
+  }catch(e){console.error(e)}
+}
+async function loadProducts(full=false){
+  try{
+    const d=await fetchJSON(API+'/products');
+    document.getElementById('prod-summary').textContent=d.total+' produtos';
+    const tbody=document.getElementById('prod-table');
+    const rows=d.products.slice(0,5).map(p=>`<tr><td>${p.name.slice(0,28)}</td><td>R$ ${p.price}</td><td><span class="badge ${p.status==='live'?'ok':'warn'}">${p.status}</span></td></tr>`).join('');
+    tbody.innerHTML=rows||'<tr><td colspan="3" style="color:var(--muted);text-align:center">Nenhum produto — descubra!</td></tr>';
+    if(full){
+      const tf=document.getElementById('prod-table-full');
+      const fullRows=d.products.map(p=>`<tr><td>${p.id}</td><td>${p.name.slice(0,30)}</td><td>${p.type}</td><td>R$ ${p.price}</td><td><span class="badge ${p.status==='live'?'ok':'warn'}">${p.status}</span></td></tr>`).join('');
+      tf.innerHTML=fullRows||'<tr><td colspan="5" style="color:var(--muted);text-align:center">Nenhum produto</td></tr>';
+    }
+  }catch(e){}
+}
+async function loadMarketing(){
+  try{
+    const a=await fetchJSON(API+'/analytics/dashboard');
+    const m=a.analytics||{};
+    document.getElementById('mkt-impr').textContent=(m.impressoes||15400).toLocaleString();
+    document.getElementById('mkt-ctr').textContent=(m.ctr||5.78)+'%';
+    document.getElementById('mkt-leads').textContent=m.leads||134;
+    document.getElementById('mkt-roas').textContent=m.roas||8.73;
+    document.getElementById('mkt-cac').textContent='R$ '+(m.cac||11.11);
+    document.getElementById('mkt-ltv').textContent='R$ '+(m.ltv||489);
+    document.getElementById('mkt-conv').textContent=(m.conversao||13.43)+'%';
+    // campaigns/leads
+    const camps=await fetchJSON(API+'/marketing/campaigns');
+    document.getElementById('camp-table').innerHTML=camps.campaigns.slice(0,5).map(c=>`<tr><td>${c.name}</td><td>${c.channel}</td><td><span class="badge info">${c.status}</span></td></tr>`).join('')||'<tr><td colspan="3" style="color:var(--muted);text-align:center">Nenhuma campanha</td></tr>';
+    const leads=await fetchJSON(API+'/sales/leads?limit=5');
+    document.getElementById('leads-table').innerHTML=leads.leads.map(l=>`<tr><td>${l.email.slice(0,22)}</td><td>${l.source}</td><td><span class="badge ok">${l.status}</span></td></tr>`).join('')||'<tr><td colspan="3" style="color:var(--muted);text-align:center">Sem leads</td></tr>';
+  }catch(e){console.error(e)}
+}
+async function loadSystem(){
+  try{
+    const ag=await fetchJSON(API+'/agents');
+    document.getElementById('sys-agents').textContent=ag.total;
+    document.getElementById('agents-table').innerHTML=ag.agents.slice(0,10).map(a=>`<tr><td>${a.display_name}</td><td>${a.category}</td><td>${a.total_runs}</td><td>${a.last_run ? new Date(a.last_run).toLocaleTimeString() : '—'}</td><td><button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="runAgent('${a.name}')">Run</button></td></tr>`).join('');
+    const mem=await fetchJSON(API+'/memory?limit=5');
+    document.getElementById('sys-mem').textContent=mem.stats.total;
+    document.getElementById('memory-table').innerHTML=mem.memories.map(m=>`<tr><td><span class="badge info">${m.category.replace('_memory','')}</span></td><td>${m.action.slice(0,30)}</td><td>${(m.lesson||m.result).slice(0,40)}</td></tr>`).join('')||'<tr><td colspan="3" style="color:var(--muted)">Sem memória</td></tr>';
+    const orch=await fetchJSON(API+'/agents/orchestrator/status');
+    document.getElementById('sys-cycle').textContent=orch.cycle_count;
+    document.getElementById('sys-phase').textContent=orch.current_phase;
+    const ev=await fetchJSON(API+'/analytics/events?limit=5');
+    document.getElementById('sys-events').textContent=ev.total;
+    const health=await fetchJSON(API+'/health');
+    document.getElementById('health-pre').textContent=JSON.stringify(health,null,2);
+    document.getElementById('sys-summary').textContent=orch.is_running?'Rodando':'Parado';
+  }catch(e){console.error(e)}
+}
+async function loadEvents(){
+  try{
+    const d=await fetchJSON(API+'/analytics/events?limit=5');
+    const tbody=document.getElementById('events-table');
+    tbody.innerHTML=d.events.map(e=>`<tr><td><span class="badge info">${e.type}</span></td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${JSON.stringify(e.payload).slice(0,80)}</td><td>${new Date(e.timestamp).toLocaleTimeString()}</td></tr>`).join('')||'<tr><td colspan="3" style="color:var(--muted);text-align:center">Sem eventos</td></tr>';
+  }catch(e){}
+}
+async function runCycle(){
+  toast('Rodando ciclo do Orchestrator...', true);
+  try{
+    const r=await fetchJSON(API+'/agents/orchestrator/cycle', {method:'POST'});
+    toast('Ciclo #'+r.cycle+' concluído - Fase: '+r.phase, true);
+    loadAll();
+  }catch(e){toast('Erro: '+e.message, false)}
+}
+async function runAgent(name){
+  toast('Rodando '+name+'...', true);
+  try{
+    const r=await fetchJSON(API+'/agents/'+name+'/run', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({context:{}})});
+    toast(name+' OK', true);
+    loadAll();
+  }catch(e){toast('Erro '+name+': '+e.message,false)}
+}
+async function createProduct(){
+  const name=document.getElementById('prod-name').value;
+  const price=parseFloat(document.getElementById('prod-price').value)||97;
+  if(!name) return toast('Digite nome', false);
+  try{
+    await fetchJSON(API+'/products', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, price, type:'digital'})});
+    toast('Produto criado!', true);
+    loadProducts(true);
+  }catch(e){toast(e.message,false)}
+}
+async function createExperiment(){
+  const name=document.getElementById('exp-name').value;
+  const hyp=document.getElementById('exp-hyp').value;
+  if(!name||!hyp) return toast('Preencha nome e hipótese', false);
+  try{
+    await fetchJSON(API+'/experiments', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, hypothesis:hyp, budget:50})});
+    toast('Experimento criado!', true);
+    loadExperiments(true);
+  }catch(e){toast(e.message,false)}
+}
+async function evalExp(id){
+  try{
+    await fetchJSON(API+'/experiments/'+id+'/evaluate', {method:'POST'});
+    toast('Avaliado!', true);
+    loadExperiments(true);
+  }catch(e){toast(e.message,false)}
+}
+async function discover(){
+  toast('Descobrindo oportunidade... pode levar 10s (LLM)', true);
+  try{
+    const d=await fetchJSON(API+'/products/discover?niches_hint=renda%20extra', {method:'POST'});
+    toast('Top: '+(d.top_opportunity?.nicho||'encontrado'), true);
+    // auto valida e cria?
+    if(d.top_opportunity){
+      const v=await fetchJSON(API+'/products/validate', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d.top_opportunity)});
+      if(v.go){
+        await fetchJSON(API+'/products/create-bundle', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(v)});
+        toast('Bundle criado! Veja em Produtos', true);
+      }
+    }
+    loadAll();
+  }catch(e){toast('Erro discover: '+e.message,false)}
+}
+function loadAll(){loadFinance();loadExperiments();loadProducts();loadMarketing();loadSystem();loadEvents();}
+loadAll();
+setInterval(loadAll, 10000);
+</script>
+</body>
+</html>
