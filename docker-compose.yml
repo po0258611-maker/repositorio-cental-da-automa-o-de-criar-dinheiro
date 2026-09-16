@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  ame:
+    build: .
+    container_name: ame-core
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+      - ame_data:/app/data
+      - ./exports:/app/exports
+    restart: unless-stopped
+    depends_on:
+      - n8n
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  dashboard:
+    image: python:3.11-slim
+    container_name: ame-dashboard-legacy
+    working_dir: /app
+    command: bash -c "pip install -q fastapi uvicorn && python dashboard/app.py"
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./:/app
+    restart: unless-stopped
+    profiles: ["legacy"]
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: ame-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=central123
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - TZ=America/Sao_Paulo
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n-workflows:/home/node/.n8n/workflows
+    restart: unless-stopped
+
+  # Optional Postgres (uncomment to use instead of sqlite)
+  # db:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_DB: ame
+  #     POSTGRES_USER: ame
+  #     POSTGRES_PASSWORD: ame123
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+volumes:
+  ame_data:
+  n8n_data:
+  # pgdata:

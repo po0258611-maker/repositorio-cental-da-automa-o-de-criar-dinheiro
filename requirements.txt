@@ -1,0 +1,55 @@
+# AME - Autonomous Money Engine - Requirements
+# Keep versions flexible to avoid conflicts
+python-dotenv
+pydantic>=2.0
+pydantic-settings
+rich
+typer
+colorama
+schedule
+requests
+httpx
+jinja2
+
+# WEB & API
+fastapi
+uvicorn[standard]
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+
+# DATABASE
+sqlalchemy>=2.0
+alembic
+aiosqlite
+greenlet
+
+# IA
+openai
+google-generativeai
+anthropic
+
+# SCRAPING & AUTOMAÇÃO
+beautifulsoup4
+lxml
+
+# BOTS
+python-telegram-bot
+twilio
+
+# DADOS & PLANILHAS
+pandas
+openpyxl
+gspread
+oauth2client
+
+# EMAIL
+yagmail
+
+# OBSERVABILITY & TESTS
+structlog
+prometheus-client
+pytest
+pytest-asyncio
+psutil

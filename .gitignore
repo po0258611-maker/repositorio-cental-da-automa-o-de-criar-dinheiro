@@ -1,0 +1,62 @@
+# AME - Gitignore
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite
+*.db
+ame.db
+ame_memory.json
+data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependências
+node_modules/
+dist/
+build/
+.ame/
+
+# n8n
+.n8n/
+
+# Dados sensíveis e temporários
+exports/
+dados/
+downloads/
+cookies/
+screenshots/
+*.mp4
+*.mp3
+*.jpg
+*.png
+!dashboard/assets/*.png
+!dashboard/*.html
+
+# Chaves
+credentials.json
+token.json
+session.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Tests & Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Alembic
+alembic_version/
+
+# Logs
+logs/
