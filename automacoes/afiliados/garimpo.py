@@ -12,6 +12,7 @@ from pathlib import Path
 try:
     from rich.console import Console
     from rich.table import Table
+    from rich.panel import Panel
     console = Console()
     HAS_RICH = True
 except:
