@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  dashboard:
+    build: .
+    container_name: central-dashboard
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    command: python dashboard/app.py
+    restart: unless-stopped
+    env_file:
+      - .env
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: central-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=central123
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - TZ=America/Sao_Paulo
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n-workflows:/home/node/.n8n/workflows
+    restart: unless-stopped
+
+  # Opcional: Postgres para dados
+  # db:
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_DB: central
+  #     POSTGRES_USER: central
+  #     POSTGRES_PASSWORD: central123
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+volumes:
+  n8n_data:
+  # pgdata:
