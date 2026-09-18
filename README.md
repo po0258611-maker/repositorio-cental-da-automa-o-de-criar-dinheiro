@@ -50,3 +50,20 @@ Não use secrets reais no repositório. Configure `.env` localmente ou um secret
 ## Regra de verdade operacional
 
 A documentação deve refletir somente o que existe e foi verificado no código. Funcionalidade declarada, mas não executável ou não testada, deve ser tratada como pendência.
+
+## Execução real (atual)
+
+A base do MVP já possui execução real condicionada a providers configurados. Pesquisa web usa Tavily/Serper; tarefas podem ser processadas pelo worker persistente; campanhas são persistidas; vendas observadas não são mais inventadas; receitas e despesas são gravadas em `transactions`.
+
+Para ativar o modo real:
+
+```env
+AME_REAL_EXECUTION=true
+AME_ALLOW_MOCKS=false
+TAVILY_API_KEY=
+SERPER_API_KEY=
+```
+
+Consulte `docs/REAL_EXECUTION_STATUS.md` para o estado exato, limitações e integrações ainda pendentes.
+
+**Regra:** uma integração sem credencial/configuração deve retornar `NOT_CONFIGURED` ou `ERROR`; não deve simular sucesso.
