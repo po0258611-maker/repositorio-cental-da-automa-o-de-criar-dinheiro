@@ -28,6 +28,13 @@ async def lifespan(app: FastAPI):
         logger.info("database_initialized")
     except Exception as e:
         logger.error("database_init_failed", error=str(e))
+    # Start durable task worker
+    try:
+        from app.core.task_runner import task_runner
+        await task_runner.start()
+    except Exception as e:
+        logger.error("task_runner_start_failed", error=str(e))
+
     # Register agents
     try:
         from app.core.orchestrator import orchestrator
@@ -38,6 +45,11 @@ async def lifespan(app: FastAPI):
         logger.error("agents_register_failed", error=str(e))
     yield
     # Shutdown
+    try:
+        from app.core.task_runner import task_runner
+        await task_runner.stop()
+    except Exception as e:
+        logger.error("task_runner_stop_failed", error=str(e))
     logger.info("ame_shutdown")
 
 app = FastAPI(
