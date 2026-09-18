@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from app.core.database import SyncSessionLocal
 from app.models.base import Task
@@ -15,7 +15,7 @@ class TaskCreate(BaseModel):
     agent_name: Optional[str] = None
     project_id: Optional[str] = None
     priority: int = 5
-    input_data: dict = {}
+    input_data: dict = Field(default_factory=dict)
 
 @router.get("")
 def list_tasks(status: Optional[str] = None, agent_name: Optional[str] = None, limit: int = 20):
