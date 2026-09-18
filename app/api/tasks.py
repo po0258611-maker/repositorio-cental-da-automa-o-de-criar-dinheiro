@@ -55,7 +55,7 @@ def get_task(task_id: str):
     finally:
         db.close()
 
-@router.post("/{task_id}/run")
+@router.post("/{task_id}/run", status_code=202)
 async def run_task(task_id: str, request: Request):
     rate_limit(request, limit=20)
     db = SyncSessionLocal()
@@ -63,21 +63,12 @@ async def run_task(task_id: str, request: Request):
         t = db.query(Task).filter(Task.id == task_id).first()
         if not t:
             raise HTTPException(status_code=404, detail="Task not found")
-        t.status = "running"
+        if t.status in {"completed", "running"}:
+            return {"id": t.id, "status": t.status, "message": "Task already claimed or completed"}
+        t.status = "pending"
+        t.error = None
+        t.updated_at = datetime.now(timezone.utc)
         db.commit()
-        # Dispatch to agent
-        from app.agents import AGENTS
-        agent = AGENTS.get(t.agent_name) if t.agent_name else None
-        if agent:
-            result = await agent.run(context=t.input_data or {})
-            t.output_data = result
-            t.status = "completed"
-            t.completed_at = datetime.now(timezone.utc)
-        else:
-            t.output_data = {"mock": True, "message": f"Task {t.title} completed (no agent)"}
-            t.status = "completed"
-            t.completed_at = datetime.now(timezone.utc)
-        db.commit()
-        return {"id": t.id, "status": t.status, "output": t.output_data}
+        return {"id": t.id, "status": "pending", "message": "Task queued for durable worker"}
     finally:
         db.close()
