@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     groq_api_key: Optional[str] = Field(default=None, env="GROQ_API_KEY")
     tavily_api_key: Optional[str] = Field(default=None, env="TAVILY_API_KEY")
     serper_api_key: Optional[str] = Field(default=None, env="SERPER_API_KEY")
+    telegram_bot_token: Optional[str] = Field(default=None, env="TELEGRAM_BOT_TOKEN")
+    telegram_chat_id: Optional[str] = Field(default=None, env="TELEGRAM_CHAT_ID")
     research_provider: str = Field(default="tavily", env="AME_RESEARCH_PROVIDER")
     allow_mocks: bool = Field(default=True, env="AME_ALLOW_MOCKS")
     real_execution: bool = Field(default=False, env="AME_REAL_EXECUTION")
