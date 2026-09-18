@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     anthropic_api_key: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
     gemini_api_key: Optional[str] = Field(default=None, env="GEMINI_API_KEY")
     groq_api_key: Optional[str] = Field(default=None, env="GROQ_API_KEY")
+    tavily_api_key: Optional[str] = Field(default=None, env="TAVILY_API_KEY")
+    serper_api_key: Optional[str] = Field(default=None, env="SERPER_API_KEY")
+    research_provider: str = Field(default="tavily", env="AME_RESEARCH_PROVIDER")
+    allow_mocks: bool = Field(default=True, env="AME_ALLOW_MOCKS")
+    real_execution: bool = Field(default=False, env="AME_REAL_EXECUTION")
     max_daily_ai_cost_usd: float = Field(default=10.0, env="AME_MAX_DAILY_AI_COST_USD")
     default_cheap_model: str = Field(default="gpt-4o-mini", env="AME_DEFAULT_CHEAP_MODEL")
     default_power_model: str = Field(default="gpt-4o", env="AME_DEFAULT_POWER_MODEL")
@@ -41,6 +46,8 @@ class Settings(BaseSettings):
     # Observability
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
     enable_metrics: bool = Field(default=True, env="ENABLE_METRICS")
+    worker_poll_seconds: float = Field(default=2.0, env="AME_WORKER_POLL_SECONDS")
+    worker_batch_size: int = Field(default=5, env="AME_WORKER_BATCH_SIZE")
     
     # System
     tz: str = Field(default="America/Sao_Paulo", env="TZ")
@@ -58,6 +65,11 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.ame_env.lower() == "production"
+
+    @property
+    def mocks_enabled(self) -> bool:
+        """Mocks are allowed only outside real execution / production by explicit opt-in."""
+        return bool(self.allow_mocks and not self.real_execution and not self.is_production)
 
     @property
     def database_url_async(self) -> str:
