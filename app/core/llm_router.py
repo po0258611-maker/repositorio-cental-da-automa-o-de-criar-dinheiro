@@ -83,10 +83,13 @@ class LLMRouter:
                 LLMProvider.GEMINI: bool(settings.gemini_api_key),
                 LLMProvider.GROQ: bool(settings.groq_api_key),
             }.get(provider, False)
-            # Se não tem key, ainda permite mas vai cair no mock
-            if self.provider_status[provider]:
+            if self.provider_status[provider] and has_key:
                 return model
-        return candidates[0]
+        # Em modo de demonstração podemos escolher um modelo e deixar o executor gerar mock.
+        # Em execução real, ausência de provider configurado deve falhar explicitamente.
+        if settings.mocks_enabled:
+            return candidates[0]
+        raise RuntimeError("No configured LLM provider is available for this task")
 
     def estimate_cost(self, model: str, input_tokens: int, output_tokens: int) -> float:
         costs = MODEL_COSTS.get(model, {"input": 0.001, "output": 0.002})
@@ -99,7 +102,9 @@ class LLMRouter:
         
         if not self._check_budget(estimated):
             logger.warning("ai_budget_blocked", model=chosen_model, estimated=estimated)
-            return self._mock_generate(prompt, reason="budget_exceeded")
+            if settings.mocks_enabled:
+                return self._mock_generate(prompt, reason="budget_exceeded")
+            raise RuntimeError("AI daily budget exceeded")
 
         # Tenta provider real, fallback para mock
         try:
@@ -116,8 +121,9 @@ class LLMRouter:
         except Exception as e:
             logger.error("llm_provider_failed", model=chosen_model, error=str(e))
             self.provider_status[MODEL_COSTS[chosen_model]["provider"]] = False
-            # Fallback para mock
-            return self._mock_generate(prompt, reason=f"provider_failed:{e}")
+            if settings.mocks_enabled:
+                return self._mock_generate(prompt, reason=f"provider_failed:{e}")
+            raise RuntimeError(f"LLM provider failed for {chosen_model}") from e
 
     def _call_provider(self, model: str, prompt: str, max_tokens: int, system: Optional[str]) -> str:
         provider = MODEL_COSTS[model]["provider"]
